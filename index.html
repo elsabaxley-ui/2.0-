@@ -1,0 +1,135 @@
+# 2.0-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimalist Parkour</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #f0f0f0; font-family: sans-serif; }
+        canvas { display: block; background: #fff; box-shadow: 0 0 20px rgba(0,0,0,0.1); margin: 20px auto; border-radius: 8px; }
+        .ui { position: absolute; top: 30px; left: 50%; transform: translateX(-50%); text-align: center; pointer-events: none; }
+    </style>
+</head>
+<body>
+    <div class="ui">
+        <h1>OVO INSPIRED</h1>
+        <p>Use <b>Arrow Keys</b> to Move & Jump</p>
+    </div>
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = 800;
+        canvas.height = 500;
+
+        // Game Constants
+        const gravity = 0.6;
+        const friction = 0.8;
+
+        const player = {
+            x: 50,
+            y: 400,
+            width: 20,
+            height: 35,
+            velX: 0,
+            velY: 0,
+            speed: 5,
+            jumpStrength: -12,
+            grounded: false
+        };
+
+        // Simple drawn barriers (Platforms)
+        const platforms = [
+            { x: 0, y: 450, w: 800, h: 50 },    // Ground
+            { x: 150, y: 350, w: 100, h: 20 },  // Platform 1
+            { x: 350, y: 280, w: 120, h: 20 },  // Platform 2
+            { x: 550, y: 200, w: 150, h: 20 },  // Platform 3
+            { x: 200, y: 150, w: 100, h: 20 }   // Higher platform
+        ];
+
+        const keys = {};
+
+        window.addEventListener('keydown', e => keys[e.code] = true);
+        window.addEventListener('keyup', e => keys[e.code] = false);
+
+        function update() {
+            // Movement logic
+            if (keys['ArrowRight']) {
+                if (player.velX < player.speed) player.velX++;
+            }
+            if (keys['ArrowLeft']) {
+                if (player.velX > -player.speed) player.velX--;
+            }
+
+            if (keys['ArrowUp'] && player.grounded) {
+                player.velY = player.jumpStrength;
+                player.grounded = false;
+            }
+
+            player.velX *= friction;
+            player.velY += gravity;
+
+            player.grounded = false;
+
+            // Collision Detection
+            for (let plat of platforms) {
+                if (player.x < plat.x + plat.w &&
+                    player.x + player.width > plat.x &&
+                    player.y < plat.y + plat.h &&
+                    player.y + player.height > plat.y) {
+                    
+                    // Collision from top
+                    if (player.velY > 0 && player.y + player.height - player.velY <= plat.y) {
+                        player.y = plat.y - player.height;
+                        player.velY = 0;
+                        player.grounded = true;
+                    } 
+                    // Collision from bottom
+                    else if (player.velY < 0 && player.y - player.velY >= plat.y + plat.h) {
+                        player.y = plat.y + plat.h;
+                        player.velY = 0;
+                    }
+                }
+            }
+
+            player.x += player.velX;
+            player.y += player.velY;
+
+            // Boundary checks
+            if (player.x < 0) player.x = 0;
+            if (player.x > canvas.width - player.width) player.x = canvas.width - player.width;
+
+            draw();
+            requestAnimationFrame(update);
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Platforms
+            ctx.fillStyle = "#333";
+            platforms.forEach(p => {
+                ctx.fillRect(p.x, p.y, p.w, p.h);
+                // Simple outline to look "drawn"
+                ctx.strokeStyle = "#000";
+                ctx.lineWidth = 2;
+                ctx.strokeRect(p.x, p.y, p.w, p.h);
+            });
+
+            // Draw Player (Simple OvO Style)
+            ctx.fillStyle = "#000";
+            // Head
+            ctx.beginPath();
+            ctx.arc(player.x + 10, player.y + 10, 8, 0, Math.PI * 2);
+            ctx.fill();
+            // Body
+            ctx.fillRect(player.x + 8, player.y + 18, 4, 15);
+        }
+
+        update();
+    </script>
+</body>
+</html>
