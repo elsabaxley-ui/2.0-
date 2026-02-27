@@ -2,18 +2,19 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Spider-OvO: Expanded</title>
+    <title>Spider-OvO: Multiverse Parkour</title>
     <style>
-        body { margin: 0; background: #050505; color: white; font-family: 'Courier New', Courier, monospace; overflow: hidden; }
-        canvas { display: block; background: #ffffff; margin: 20px auto; border: 5px solid #000; box-shadow: 8px 8px 0px #00f2ff, -8px -8px 0px #ff0055; }
-        .ui { text-align: center; margin-top: 10px; text-transform: uppercase; letter-spacing: 2px; }
-        #levelDisplay { font-size: 24px; color: #ff0055; margin: 0; }
+        body { margin: 0; background: #050505; color: white; font-family: 'Courier New', Courier, monospace; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        canvas { background: #ffffff; border: 5px solid #000; box-shadow: 8px 8px 0px #00f2ff, -8px -8px 0px #ff0055; cursor: none; }
+        .ui { text-align: center; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 2px; }
+        #levelDisplay { font-size: 28px; color: #ff0055; margin: 0; text-shadow: 2px 2px #00f2ff; }
+        p { color: #333; font-weight: bold; margin: 5px 0; }
     </style>
 </head>
 <body>
     <div class="ui">
         <h2 id="levelDisplay">LEVEL 1</h2>
-        <p style="color: #333;">Arrows to Move | Reach the Flag</p>
+        <p>ARROWS TO MOVE | REACH THE FLAG</p>
     </div>
     <canvas id="gameCanvas"></canvas>
 
@@ -24,66 +25,63 @@
         canvas.height = 500;
 
         let currentLevel = 0;
-        const player = { x: 50, y: 400, w: 18, h: 32, vx: 0, vy: 0, speed: 4.5, jump: -11.5, grounded: false };
-        const gravity = 0.55;
+        const player = { x: 50, y: 400, w: 20, h: 30, vx: 0, vy: 0, speed: 4.8, jump: -12, grounded: false };
+        const gravity = 0.6;
         const friction = 0.82;
 
         const levels = [
-            { // Level 1: The Basics
+            { // Level 1: Intro
                 start: { x: 50, y: 400 },
                 goal: { x: 720, y: 150 },
                 platforms: [
-                    { x: 0, y: 460, w: 300, h: 40 },
+                    { x: 0, y: 450, w: 300, h: 50 },
                     { x: 350, y: 380, w: 150, h: 20 },
-                    { x: 550, y: 300, w: 150, h: 20 },
+                    { x: 550, y: 290, w: 150, h: 20 },
                     { x: 700, y: 210, w: 80, h: 20 }
                 ]
             },
-            { // Level 2: The Ascent
+            { // Level 2: The Climb
                 start: { x: 50, y: 400 },
-                goal: { x: 50, y: 60 },
+                goal: { x: 70, y: 100 },
                 platforms: [
-                    { x: 0, y: 460, w: 150, h: 40 },
-                    { x: 200, y: 390, w: 120, h: 20 },
+                    { x: 0, y: 450, w: 150, h: 50 },
+                    { x: 200, y: 380, w: 120, h: 20 },
                     { x: 400, y: 310, w: 120, h: 20 },
                     { x: 250, y: 230, w: 100, h: 20 },
-                    { x: 50, y: 150, w: 100, h: 20 },
-                    { x: 20, y: 100, w: 80, h: 20 }
+                    { x: 50, y: 160, w: 100, h: 20 }
                 ]
             },
-            { // Level 3: Leap of Faith
-                start: { x: 20, y: 400 },
+            { // Level 3: Long Jumps
+                start: { x: 30, y: 400 },
                 goal: { x: 750, y: 400 },
                 platforms: [
-                    { x: 0, y: 460, w: 100, h: 40 },
-                    { x: 180, y: 380, w: 60, h: 20 },
-                    { x: 340, y: 300, w: 60, h: 20 },
-                    { x: 500, y: 380, w: 60, h: 20 },
+                    { x: 0, y: 450, w: 100, h: 50 },
+                    { x: 180, y: 380, w: 70, h: 20 },
+                    { x: 360, y: 310, w: 70, h: 20 },
+                    { x: 540, y: 380, w: 70, h: 20 },
+                    { x: 700, y: 450, w: 100, h: 50 }
+                ]
+            },
+            { // Level 4: The Drop
+                start: { x: 50, y: 50 },
+                goal: { x: 720, y: 410 },
+                platforms: [
+                    { x: 20, y: 120, w: 100, h: 20 },
+                    { x: 180, y: 180, w: 100, h: 20 },
+                    { x: 350, y: 250, w: 100, h: 20 },
+                    { x: 520, y: 330, w: 100, h: 20 },
                     { x: 680, y: 460, w: 120, h: 40 }
                 ]
             },
-            { // Level 4: The Gauntlet
-                start: { x: 50, y: 100 },
-                goal: { x: 700, y: 400 },
-                platforms: [
-                    { x: 20, y: 150, w: 100, h: 20 },
-                    { x: 180, y: 180, w: 100, h: 20 },
-                    { x: 350, y: 220, w: 100, h: 20 },
-                    { x: 520, y: 270, w: 100, h: 20 },
-                    { x: 680, y: 340, w: 100, h: 20 },
-                    { x: 650, y: 460, w: 150, h: 40 }
-                ]
-            },
-            { // Level 5: Precision
+            { // Level 5: Final Precision
                 start: { x: 400, y: 400 },
-                goal: { x: 400, y: 50 },
+                goal: { x: 400, y: 60 },
                 platforms: [
                     { x: 350, y: 460, w: 100, h: 40 },
-                    { x: 550, y: 380, w: 40, h: 20 },
-                    { x: 380, y: 300, w: 40, h: 20 },
-                    { x: 210, y: 220, w: 40, h: 20 },
-                    { x: 380, y: 140, w: 40, h: 20 },
-                    { x: 380, y: 90, w: 60, h: 20 }
+                    { x: 550, y: 380, w: 50, h: 20 },
+                    { x: 380, y: 300, w: 50, h: 20 },
+                    { x: 200, y: 220, w: 50, h: 20 },
+                    { x: 380, y: 120, w: 50, h: 20 }
                 ]
             }
         ];
@@ -127,12 +125,12 @@
             player.x += player.vx;
             player.y += player.vy;
 
-            // Goal detection
-            const dist = Math.hypot(player.x - lvl.goal.x, player.y - lvl.goal.y);
-            if (dist < 35) {
+            // Goal check
+            const dist = Math.hypot((player.x + 10) - lvl.goal.x, (player.y + 15) - lvl.goal.y);
+            if (dist < 40) {
                 currentLevel++;
                 if (currentLevel >= levels.length) {
-                    alert("MULTIVERSE SAVED! You win!");
+                    alert("YOU SAVED THE MULTIVERSE!");
                     currentLevel = 0;
                 }
                 document.getElementById('levelDisplay').innerText = "LEVEL " + (currentLevel + 1);
@@ -150,29 +148,44 @@
             const lvl = levels[currentLevel];
 
             // Draw Platforms
+            ctx.strokeStyle = "#000";
             ctx.lineWidth = 4;
             lvl.platforms.forEach(p => {
-                ctx.strokeStyle = "#000";
                 ctx.strokeRect(p.x, p.y, p.w, p.h);
-                // Interior "sketch" lines
-                ctx.strokeStyle = "#ddd";
-                ctx.beginPath();
-                ctx.moveTo(p.x + 5, p.y + 5);
-                ctx.lineTo(p.x + p.w - 5, p.y + p.h - 5);
-                ctx.stroke();
+                ctx.fillStyle = "#fff";
+                ctx.fillRect(p.x, p.y, p.w, p.h);
             });
 
             // Draw Goal Flag
             ctx.fillStyle = "#ff0055";
-            ctx.fillRect(lvl.goal.x, lvl.goal.y, 8, 40);
+            ctx.fillRect(lvl.goal.x, lvl.goal.y, 6, 40);
             ctx.beginPath();
-            ctx.moveTo(lvl.goal.x + 8, lvl.goal.y);
+            ctx.moveTo(lvl.goal.x + 6, lvl.goal.y);
             ctx.lineTo(lvl.goal.x + 30, lvl.goal.y + 12);
-            ctx.lineTo(lvl.goal.x + 8, lvl.goal.y + 24);
+            ctx.lineTo(lvl.goal.x + 6, lvl.goal.y + 24);
             ctx.fill();
 
-            // Glitch Effect logic
-            let shakeX = (Math.random() - 0.5) * 2;
+            // Spider-Verse Glitch Logic
+            let glitch = (Math.random() > 0.9) ? (Math.random() - 0.5) * 10 : 0;
+
+            ctx.globalAlpha = 0.5;
+            ctx.fillStyle = "#00f2ff"; // Cyan offset
+            ctx.fillRect(player.x - 4 + glitch, player.y, player.w, player.h);
+            ctx.fillStyle = "#ff0055"; // Magenta offset
+            ctx.fillRect(player.x + 4 - glitch, player.y, player.w, player.h);
             
-            // Draw Player Layers
-            ctx.globalAlpha = 0
+            ctx.globalAlpha = 1.0;
+            ctx.fillStyle = "#000";
+            ctx.fillRect(player.x, player.y, player.w, player.h);
+            
+            // OvO Eyes
+            ctx.fillStyle = "#fff";
+            ctx.fillRect(player.x + 4, player.y + 6, 4, 4);
+            ctx.fillRect(player.x + 12, player.y + 6, 4, 4);
+        }
+
+        resetPlayer();
+        update();
+    </script>
+</body>
+</html>
