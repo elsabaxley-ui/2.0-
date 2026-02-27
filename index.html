@@ -2,17 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Spider-OvO Parkour</title>
+    <title>Spider-OvO: Expanded</title>
     <style>
-        body { margin: 0; background: #111; color: white; font-family: 'Courier New', Courier, monospace; overflow: hidden; }
-        canvas { display: block; background: #fafafa; margin: 20px auto; border: 4px solid #333; box-shadow: 10px 10px 0px #ff0055; }
-        .ui { text-align: center; margin-top: 10px; }
+        body { margin: 0; background: #050505; color: white; font-family: 'Courier New', Courier, monospace; overflow: hidden; }
+        canvas { display: block; background: #ffffff; margin: 20px auto; border: 5px solid #000; box-shadow: 8px 8px 0px #00f2ff, -8px -8px 0px #ff0055; }
+        .ui { text-align: center; margin-top: 10px; text-transform: uppercase; letter-spacing: 2px; }
+        #levelDisplay { font-size: 24px; color: #ff0055; margin: 0; }
     </style>
 </head>
 <body>
     <div class="ui">
         <h2 id="levelDisplay">LEVEL 1</h2>
-        <p>ARROWS to move | Reach the <span style="color: #ff0055; font-weight: bold;">RED FLAG</span></p>
+        <p style="color: #333;">Arrows to Move | Reach the Flag</p>
     </div>
     <canvas id="gameCanvas"></canvas>
 
@@ -23,31 +24,66 @@
         canvas.height = 500;
 
         let currentLevel = 0;
-        const player = { x: 50, y: 400, w: 20, h: 35, vx: 0, vy: 0, speed: 5, jump: -11, grounded: false };
-        const gravity = 0.6;
-        const friction = 0.85;
+        const player = { x: 50, y: 400, w: 18, h: 32, vx: 0, vy: 0, speed: 4.5, jump: -11.5, grounded: false };
+        const gravity = 0.55;
+        const friction = 0.82;
 
-        // Level Design: Ensured jumping height (max ~110px) is respected
         const levels = [
-            { // Level 1: Basics
+            { // Level 1: The Basics
                 start: { x: 50, y: 400 },
-                goal: { x: 700, y: 150 },
+                goal: { x: 720, y: 150 },
                 platforms: [
-                    { x: 0, y: 450, w: 800, h: 50 },
-                    { x: 200, y: 360, w: 150, h: 20 },
-                    { x: 400, y: 270, w: 150, h: 20 },
-                    { x: 650, y: 180, w: 100, h: 20 }
+                    { x: 0, y: 460, w: 300, h: 40 },
+                    { x: 350, y: 380, w: 150, h: 20 },
+                    { x: 550, y: 300, w: 150, h: 20 },
+                    { x: 700, y: 210, w: 80, h: 20 }
                 ]
             },
-            { // Level 2: Zig Zag
+            { // Level 2: The Ascent
                 start: { x: 50, y: 400 },
-                goal: { x: 50, y: 100 },
+                goal: { x: 50, y: 60 },
                 platforms: [
-                    { x: 0, y: 450, w: 200, h: 50 },
-                    { x: 250, y: 380, w: 150, h: 20 },
-                    { x: 450, y: 300, w: 200, h: 20 },
-                    { x: 250, y: 220, w: 150, h: 20 },
-                    { x: 20, y: 140, w: 100, h: 20 }
+                    { x: 0, y: 460, w: 150, h: 40 },
+                    { x: 200, y: 390, w: 120, h: 20 },
+                    { x: 400, y: 310, w: 120, h: 20 },
+                    { x: 250, y: 230, w: 100, h: 20 },
+                    { x: 50, y: 150, w: 100, h: 20 },
+                    { x: 20, y: 100, w: 80, h: 20 }
+                ]
+            },
+            { // Level 3: Leap of Faith
+                start: { x: 20, y: 400 },
+                goal: { x: 750, y: 400 },
+                platforms: [
+                    { x: 0, y: 460, w: 100, h: 40 },
+                    { x: 180, y: 380, w: 60, h: 20 },
+                    { x: 340, y: 300, w: 60, h: 20 },
+                    { x: 500, y: 380, w: 60, h: 20 },
+                    { x: 680, y: 460, w: 120, h: 40 }
+                ]
+            },
+            { // Level 4: The Gauntlet
+                start: { x: 50, y: 100 },
+                goal: { x: 700, y: 400 },
+                platforms: [
+                    { x: 20, y: 150, w: 100, h: 20 },
+                    { x: 180, y: 180, w: 100, h: 20 },
+                    { x: 350, y: 220, w: 100, h: 20 },
+                    { x: 520, y: 270, w: 100, h: 20 },
+                    { x: 680, y: 340, w: 100, h: 20 },
+                    { x: 650, y: 460, w: 150, h: 40 }
+                ]
+            },
+            { // Level 5: Precision
+                start: { x: 400, y: 400 },
+                goal: { x: 400, y: 50 },
+                platforms: [
+                    { x: 350, y: 460, w: 100, h: 40 },
+                    { x: 550, y: 380, w: 40, h: 20 },
+                    { x: 380, y: 300, w: 40, h: 20 },
+                    { x: 210, y: 220, w: 40, h: 20 },
+                    { x: 380, y: 140, w: 40, h: 20 },
+                    { x: 380, y: 90, w: 60, h: 20 }
                 ]
             }
         ];
@@ -63,24 +99,11 @@
             player.vx = 0; player.vy = 0;
         }
 
-        function checkCollision(p, plat) {
-            if (p.x < plat.x + plat.w && p.x + p.w > plat.x &&
-                p.y < plat.y + plat.h && p.y + p.h > plat.y) {
-                
-                // Top collision
-                if (p.vy > 0 && p.y + p.h - p.vy <= plat.y) {
-                    p.y = plat.y - p.h;
-                    p.vy = 0;
-                    p.grounded = true;
-                }
-            }
-        }
-
         function update() {
             const lvl = levels[currentLevel];
             
-            if (keys['ArrowRight']) { if (player.vx < player.speed) player.vx++; }
-            if (keys['ArrowLeft']) { if (player.vx > -player.speed) player.vx--; }
+            if (keys['ArrowRight']) { if (player.vx < player.speed) player.vx += 0.8; }
+            if (keys['ArrowLeft']) { if (player.vx > -player.speed) player.vx -= 0.8; }
             if (keys['ArrowUp'] && player.grounded) {
                 player.vy = player.jump;
                 player.grounded = false;
@@ -90,24 +113,32 @@
             player.vy += gravity;
             player.grounded = false;
 
-            lvl.platforms.forEach(plat => checkCollision(player, plat));
+            lvl.platforms.forEach(plat => {
+                if (player.x < plat.x + plat.w && player.x + player.w > plat.x &&
+                    player.y < plat.y + plat.h && player.y + player.h > plat.y) {
+                    if (player.vy > 0 && player.y + player.h - player.vy <= plat.y) {
+                        player.y = plat.y - player.h;
+                        player.vy = 0;
+                        player.grounded = true;
+                    }
+                }
+            });
 
             player.x += player.vx;
             player.y += player.vy;
 
-            // Goal check
-            const distToGoal = Math.hypot(player.x - lvl.goal.x, player.y - lvl.goal.y);
-            if (distToGoal < 30) {
+            // Goal detection
+            const dist = Math.hypot(player.x - lvl.goal.x, player.y - lvl.goal.y);
+            if (dist < 35) {
                 currentLevel++;
                 if (currentLevel >= levels.length) {
-                    alert("YOU BEAT THE GAME!");
+                    alert("MULTIVERSE SAVED! You win!");
                     currentLevel = 0;
                 }
                 document.getElementById('levelDisplay').innerText = "LEVEL " + (currentLevel + 1);
                 resetPlayer();
             }
 
-            // Fall off screen reset
             if (player.y > canvas.height) resetPlayer();
 
             draw();
@@ -118,38 +149,30 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             const lvl = levels[currentLevel];
 
-            // Draw Platforms (Drawn style)
-            ctx.strokeStyle = "#000";
-            ctx.lineWidth = 3;
+            // Draw Platforms
+            ctx.lineWidth = 4;
             lvl.platforms.forEach(p => {
+                ctx.strokeStyle = "#000";
                 ctx.strokeRect(p.x, p.y, p.w, p.h);
-                ctx.fillStyle = "#eee";
-                ctx.fillRect(p.x, p.y, p.w, p.h);
+                // Interior "sketch" lines
+                ctx.strokeStyle = "#ddd";
+                ctx.beginPath();
+                ctx.moveTo(p.x + 5, p.y + 5);
+                ctx.lineTo(p.x + p.w - 5, p.y + p.h - 5);
+                ctx.stroke();
             });
 
             // Draw Goal Flag
             ctx.fillStyle = "#ff0055";
-            ctx.fillRect(lvl.goal.x, lvl.goal.y, 10, 40);
+            ctx.fillRect(lvl.goal.x, lvl.goal.y, 8, 40);
             ctx.beginPath();
-            ctx.moveTo(lvl.goal.x + 10, lvl.goal.y);
-            ctx.lineTo(lvl.goal.x + 35, lvl.goal.y + 10);
-            ctx.lineTo(lvl.goal.x + 10, lvl.goal.y + 20);
+            ctx.moveTo(lvl.goal.x + 8, lvl.goal.y);
+            ctx.lineTo(lvl.goal.x + 30, lvl.goal.y + 12);
+            ctx.lineTo(lvl.goal.x + 8, lvl.goal.y + 24);
             ctx.fill();
 
-            // Draw Player (Spider-Verse Glitch Style)
-            // Blue offset
-            ctx.fillStyle = "rgba(0, 255, 255, 0.7)";
-            ctx.fillRect(player.x - 2, player.y, player.w, player.h);
-            // Red offset
-            ctx.fillStyle = "rgba(255, 0, 85, 0.7)";
-            ctx.fillRect(player.x + 2, player.y, player.w, player.h);
-            // Main Body
-            ctx.fillStyle = "#000";
-            ctx.fillRect(player.x, player.y, player.w, player.h);
-        }
-
-        resetPlayer();
-        update();
-    </script>
-</body>
-</html>
+            // Glitch Effect logic
+            let shakeX = (Math.random() - 0.5) * 2;
+            
+            // Draw Player Layers
+            ctx.globalAlpha = 0
